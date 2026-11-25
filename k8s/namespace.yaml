@@ -1,0 +1,12 @@
+# ET1 : namespace dédié au wiki. Les labels Pod Security sont en "baseline"
+# (l'image linuxserver démarre en root puis abaisse ses privilèges via s6) et en
+# "restricted" pour l'audit/avertissement afin de voir ce qui manquerait (option O5).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wiki
+  labels:
+    app.kubernetes.io/part-of: wiki-rhenatech
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: baseline

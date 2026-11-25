@@ -1,0 +1,6 @@
+.secrets/
+backups/
+*.key
+*.kubeconfig
+kubeconfig*
+.env

@@ -1,0 +1,11 @@
+# Réglages MariaDB montés dans /etc/mysql/conf.d/
+[mysqld]
+character-set-server = utf8mb4
+collation-server     = utf8mb4_unicode_ci
+# 40 connexions simultanées côté wiki : BookStack ouvre ~1 connexion par requête PHP
+max_connections      = 100
+innodb_buffer_pool_size = 256M
+innodb_log_file_size    = 64M
+skip-name-resolve
+# Pas d'écoute sur autre chose que le réseau du pod ; la NetworkPolicy fait le reste
+bind-address = 0.0.0.0

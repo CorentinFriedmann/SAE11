@@ -1,0 +1,112 @@
+# ET7 : cloisonnement réseau du namespace "wiki" (appliqué par kube-router, intégré à k3s).
+# Principe : tout est refusé, puis on ouvre uniquement les flux de la matrice
+# (docs/cahier-des-charges/06-securite-rgpd.md).
+#
+#   Traefik (kube-system) -> bookstack:80
+#   bookstack             -> mariadb:3306
+#   jobs wiki-backup / wiki-maintenance (sauvegarde, purge, restauration) -> mariadb:3306
+#   tous les pods         -> kube-dns:53 (UDP+TCP)
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bookstack-from-traefik
+spec:
+  podSelector:
+    matchLabels:
+      app: bookstack
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - { protocol: TCP, port: 80 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bookstack-to-mariadb
+spec:
+  podSelector:
+    matchLabels:
+      app: bookstack
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mariadb
+      ports:
+        - { protocol: TCP, port: 3306 }
+---
+# Seuls BookStack et les jobs d'exploitation (sauvegarde/restauration/purge RGPD)
+# joignent MariaDB. Un pod de test sans ces labels est refusé (recette R8).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mariadb-from-clients
+spec:
+  podSelector:
+    matchLabels:
+      app: mariadb
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [bookstack, wiki-backup, wiki-maintenance]
+      ports:
+        - { protocol: TCP, port: 3306 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jobs-to-mariadb
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: [wiki-backup, wiki-maintenance]
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mariadb
+      ports:
+        - { protocol: TCP, port: 3306 }

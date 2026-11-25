@@ -1,0 +1,141 @@
+# ET8 / B11 : sauvegarde automatique quotidienne (base + fichiers) et purge RGPD du journal.
+# RPO 24 h (sauvegarde à 02:00), rétention 7 jours sur le PVC "wiki-backups",
+# copie hors cluster par scripts/backup-export.sh (règle : une sauvegarde qui ne
+# quitte pas la plateforme ne protège pas contre la perte de la plateforme).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wiki-backups
+  labels:
+    app: wiki-backup
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      # 7 sauvegardes x (dump ~0,3 Go + archive fichiers jusqu'à ~10 Go, déjà compressés en grande partie)
+      # dimensionné pour la 1re année (~3 Go de fichiers) ; à porter à 80 Gi en année 3 (voir dossier B9)
+      storage: 30Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wiki-backup
+  labels:
+    app: wiki-backup
+spec:
+  schedule: "0 2 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app: wiki-backup        # label autorisé par la NetworkPolicy vers MariaDB
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000          # même uid que les fichiers de BookStack (PUID)
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: mariadb         # même version que le serveur (client mariadb-dump compatible)
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - { name: DB_HOST, value: mariadb }
+                - { name: DB_DATABASE, value: bookstack }
+                - { name: DB_USERNAME, value: bookstack }
+                - { name: RETENTION_DAYS, value: "7" }
+                - { name: TZ, value: Europe/Paris }
+                - name: MYSQL_PWD
+                  valueFrom:
+                    secretKeyRef: { name: wiki-secrets, key: DB_PASSWORD }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts, readOnly: true }
+                - { name: config, mountPath: /config, readOnly: true }
+                - { name: backups, mountPath: /backup }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits: { cpu: 500m, memory: 512Mi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            - name: scripts
+              configMap:
+                name: wiki-ops-scripts
+            - name: config
+              persistentVolumeClaim:
+                claimName: bookstack-config
+            - name: backups
+              persistentVolumeClaim:
+                claimName: wiki-backups
+---
+# B12 : purge hebdomadaire du journal d'audit au-delà de la durée de conservation
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wiki-audit-purge
+  labels:
+    app: wiki-maintenance
+spec:
+  schedule: "30 3 * * 0"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: wiki-maintenance
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: purge
+              image: mariadb
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/bash", "/scripts/purge-audit.sh"]
+              env:
+                - { name: DB_HOST, value: mariadb }
+                - { name: DB_DATABASE, value: bookstack }
+                - { name: DB_USERNAME, value: bookstack }
+                - { name: AUDIT_RETENTION_DAYS, value: "365" }
+                - name: MYSQL_PWD
+                  valueFrom:
+                    secretKeyRef: { name: wiki-secrets, key: DB_PASSWORD }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts, readOnly: true }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { cpu: 200m, memory: 128Mi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            - name: scripts
+              configMap:
+                name: wiki-ops-scripts

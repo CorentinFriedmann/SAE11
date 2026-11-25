@@ -1,0 +1,123 @@
+# BookStack : Deployment à 1 réplica (stratégie Recreate) + PVC + Service.
+# Recreate : le volume est en ReadWriteOnce (local-path) ; on évite que deux pods
+# écrivent /config et migrent la base en même temps pendant une mise à jour.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookstack-config
+  labels:
+    app: bookstack
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 15Gi        # B9 : 10 Go de pièces jointes sur 3 ans + 50 % de marge
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstack
+  labels:
+    app: bookstack
+spec:
+  selector:
+    app: bookstack
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstack
+  labels:
+    app: bookstack
+  annotations:
+    kubernetes.io/change-cause: "déploiement initial"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10         # ET10 : historique pour kubectl rollout undo
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bookstack
+  template:
+    metadata:
+      labels:
+        app: bookstack
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bookstack
+          image: lscr.io/linuxserver/bookstack   # version épinglée dans kustomization.yaml
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: bookstack-env
+          env:
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef: { name: wiki-secrets, key: APP_KEY }
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: wiki-secrets, key: DB_PASSWORD }
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: php
+              mountPath: /rhenatech
+              readOnly: true
+            - name: custom-init
+              mountPath: /custom-cont-init.d/10-rhenatech-init.sh
+              subPath: 10-rhenatech-init.sh
+              readOnly: true
+          # ET6 : /status vérifie base, cache et session (HTTP 200 si tout va bien).
+          # startupProbe généreuse : au premier démarrage ou après une mise à jour,
+          # l'image migre le schéma de la base avant de servir.
+          startupProbe:
+            httpGet: { path: /status, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 36            # 6 minutes
+          readinessProbe:
+            httpGet: { path: /status, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # La liveness ne dépend pas de la base : une panne MariaDB ne doit pas
+          # faire redémarrer BookStack en boucle (il redevient "ready" seul).
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: bookstack-config
+        - name: php
+          configMap:
+            name: bookstack-php
+        - name: custom-init
+          configMap:
+            name: bookstack-custom-init
+            defaultMode: 0755

@@ -1,0 +1,40 @@
+# ET2 : tout le socle se déploie avec  kubectl apply -k k8s/
+# (scripts/deploy.sh ajoute les Secrets, générés localement et jamais versionnés).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: wiki
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: wiki-rhenatech
+    includeSelectors: false
+
+resources:
+  - namespace.yaml
+  - mariadb.yaml
+  - bookstack.yaml
+  - ingress.yaml
+  - networkpolicies.yaml
+  - backup.yaml
+
+# ET4 : configuration en ConfigMap. Kustomize ajoute un suffixe de hachage :
+# toute modification de configuration déclenche un redéploiement propre.
+configMapGenerator:
+  - name: bookstack-env
+    envs: [config/bookstack.env]
+  - name: bookstack-php
+    files: [config/php-local.ini]
+  - name: bookstack-custom-init
+    files: [config/10-rhenatech-init.sh]
+  - name: mariadb-conf
+    files: [config/mariadb.cnf]
+  - name: wiki-ops-scripts
+    files: [config/backup.sh, config/purge-audit.sh]
+
+# ET1 : images officielles à une version précise, jamais "latest".
+# Mise à jour (ET10, recette R11) : version-v26.09.2 -> version-v26.09.3, voir scripts/upgrade.sh
+images:
+  - name: lscr.io/linuxserver/bookstack
+    newTag: v26.09.2-ls296
+  - name: mariadb
+    newTag: 11.8.9
