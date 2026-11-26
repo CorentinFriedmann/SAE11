@@ -16,6 +16,7 @@ quotidienne avec restauration testée, mise à jour avec retour arrière.
 | [`docs/00-cadrage.md`](docs/00-cadrage.md) | Note de cadrage : ce que nous allons faire, architecture, planning par jalon |
 | [`docs/cahier-des-charges/`](docs/cahier-des-charges/) | Le dossier rendu (10 parties + annexes), écrit au fil de l'eau |
 | [`docs/recette/`](docs/recette/) | Journaux de recette R1 à R12 produits par `scripts/recette.sh` |
+| [`docs/rapport/rapport-wiki-rhenatech.pdf`](docs/rapport/rapport-wiki-rhenatech.pdf) | **Rapport complet** (PDF 26 p. ; source `rapport.html`, version Word éditable) |
 | [`docs/demo-oral.md`](docs/demo-oral.md) | Déroulé de la démonstration et réponses préparées aux questions du jury |
 
 ## Prérequis

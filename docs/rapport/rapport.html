@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Wiki Rhénatech — Cahier des charges technique</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  :root { --bleu:#13325b; --or:#a8842c; --gris:#5b6472; --fond:#f4f6f9; --vert:#1f7a3e; --rouge:#b3261e; }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter","Segoe UI","DejaVu Sans",Arial,sans-serif; font-size: 10pt; line-height: 1.45; color:#1d2430; margin:0; }
+  h1 { font-size: 17pt; color: var(--bleu); border-bottom: 2px solid var(--or); padding-bottom: 4px; margin: 0 0 10px; break-after: avoid; }
+  h1 .num { color: var(--or); margin-right: 8px; }
+  h2 { font-size: 12pt; color: var(--bleu); margin: 14px 0 6px; break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 10px 0 4px; break-after: avoid; }
+  p { margin: 0 0 7px; text-align: justify; }
+  section.part { break-before: page; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.6pt; break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th { background: var(--bleu); color: #fff; text-align: left; padding: 4px 6px; font-weight: 600; }
+  td { border-bottom: 1px solid #dde2ea; padding: 4px 6px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  code { font-family: "JetBrains Mono","DejaVu Sans Mono",Consolas,monospace; font-size: 8.3pt; background: #eef1f5; padding: 0 3px; border-radius: 3px; }
+  pre { font-family: "JetBrains Mono","DejaVu Sans Mono",Consolas,monospace; font-size: 7.8pt; background: #0f1d33; color: #e6ebf2; padding: 8px 10px; border-radius: 5px; white-space: pre-wrap; margin: 6px 0 10px; break-inside: avoid; line-height: 1.35; }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  .c { color: #8fb3d9; }
+  .ok { color: var(--vert); font-weight: 700; }
+  .ko { color: var(--rouge); font-weight: 700; }
+  .ind { color: var(--rouge); font-weight: 600; }
+  .sou { color: #1d5fbf; font-weight: 600; }
+  .note { border-left: 3px solid var(--or); background: #fbf7ec; padding: 6px 10px; margin: 8px 0; font-size: 9pt; break-inside: avoid; }
+  .warn { border-left: 3px solid var(--rouge); background: #fdf1f0; padding: 6px 10px; margin: 7px 0; font-size: 9pt; break-inside: avoid; }
+  .warn b:first-child { color: var(--rouge); }
+  .info { border-left: 3px solid #2f6db5; background: #eef4fb; padding: 6px 10px; margin: 8px 0; font-size: 9pt; break-inside: avoid; }
+  figure { margin: 8px 0 12px; text-align: center; break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid #ccd3dd; border-radius: 4px; }
+  figcaption { font-size: 8.3pt; color: var(--gris); margin-top: 3px; font-style: italic; }
+  .crop { height: 62mm; overflow: hidden; border: 1px solid #ccd3dd; border-radius: 4px; }
+  .crop img { border: none; width: 100%; max-width: 100%; display: block; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid2 figure { margin: 4px 0; }
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 12px; }
+  .kpi div { background: var(--fond); border-top: 3px solid var(--bleu); padding: 6px 8px; border-radius: 3px; }
+  .kpi b { display: block; font-size: 15pt; color: var(--bleu); }
+  .kpi span { font-size: 8pt; color: var(--gris); }
+  svg text { font-family: "Inter","DejaVu Sans",Arial,sans-serif; }
+
+  /* page de garde */
+  .cover { height: 255mm; display: flex; flex-direction: column; }
+  .cover .band { border: 1.5px solid var(--bleu); border-radius: 6px; padding: 18mm 14mm 12mm; position: relative; }
+  .cover .kicker { color: var(--or); font-size: 9pt; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
+  .cover h1.t { font-family: Georgia,"DejaVu Serif",serif; font-size: 30pt; border: none; margin: 8px 0 4px; color: var(--bleu); }
+  .cover .sub { font-family: Georgia,"DejaVu Serif",serif; font-size: 14pt; color: #384356; margin-bottom: 14mm; }
+  .cover .seal { position: absolute; right: 14mm; top: 14mm; width: 26mm; height: 26mm; border: 2px solid var(--or); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--or); font-family: Georgia,serif; font-weight: 700; font-size: 10pt; line-height: 1.1; }
+  .cover table td { border: none; padding: 4px 0; font-size: 10pt; background: none !important; }
+  .cover table td:first-child { width: 42mm; font-weight: 700; color: var(--bleu); }
+  .cover .bottom { margin-top: auto; font-size: 8.5pt; color: var(--gris); border-top: 1px solid #dde2ea; padding-top: 6px; }
+  .toc { break-before: page; }
+  .toc ol { padding-left: 0; list-style: none; counter-reset: t; }
+  .toc li { display: flex; justify-content: space-between; border-bottom: 1px dotted #b7c0cc; padding: 5px 0; font-size: 10.5pt; }
+  .toc li span:last-child { color: var(--gris); font-size: 9pt; }
+  .toc .sub li { font-size: 9.5pt; padding: 3px 0 3px 12px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ GARDE -->
+<div class="cover">
+  <div class="band">
+    <div class="seal">Rhéna<br>tech</div>
+    <div class="kicker">IUT de Colmar · BUT R&amp;T 3e année · SAÉ5.DevCloud.03</div>
+    <h1 class="t">Cahier des charges technique</h1>
+    <div class="sub">Wiki Rhénatech : BookStack et MariaDB sur Kubernetes (k3s),<br>documentation interne et procédures des prestataires</div>
+    <table>
+      <tr><td>Client</td><td>Rhénatech (entreprise fictive), Colmar</td></tr>
+      <tr><td>Interlocutrice</td><td>Claire Fischer, responsable infrastructure</td></tr>
+      <tr><td>Groupe</td><td>Corentin Friedmann · [Prénom Nom] · [Prénom Nom]</td></tr>
+      <tr><td>Adresse du service</td><td>https://wiki.rhenatech.lab</td></tr>
+      <tr><td>Plateforme</td><td>k3s v1.35.10 · BookStack v26.09.2 · MariaDB 11.8.9</td></tr>
+      <tr><td>Dépôt</td><td>github.com/corentinfriedmann/sae11 (branche de travail)</td></tr>
+      <tr><td>Version</td><td>v1.0 du 26/11/2026 · remise le 20/01/2027 · soutenance le 22/01/2027</td></tr>
+    </table>
+  </div>
+  <div style="margin-top:12mm">
+    <div class="kpi">
+      <div><b>1</b><span>commande pour tout déployer de zéro (86 s)</span></div>
+      <div><b>12 / 12</b><span>tests de recette R1 à R12 réussis</span></div>
+      <div><b>87 s</b><span>remise en service après destruction complète (exigé : 4 h)</span></div>
+      <div><b>0</b><span>secret dans le dépôt Git (vérifié par R9)</span></div>
+    </div>
+  </div>
+  <div class="bottom">Document de travail du groupe. Toutes les données sont fictives : aucune donnée réelle de client, de salarié ni de prestataire.
+  Les mesures citées proviennent de la campagne de recette du 25/11/2026 sur le cluster de préparation (annexe E).</div>
+</div>
+
+<!-- ============================================================ SOMMAIRE -->
+<div class="toc">
+  <h1>Sommaire</h1>
+  <ol>
+    <li><span>Préambule et introduction</span><span>3</span></li>
+    <li><span><b>1</b> · Contexte et besoins</span><span>4</span></li>
+    <li><span><b>2</b> · Architecture</span><span>6</span></li>
+    <li><span><b>3</b> · Choix et justifications : le pourquoi</span><span>8</span></li>
+    <li><span><b>4</b> · Mise en œuvre : le comment</span><span>10</span></li>
+    <li><span><b>5</b> · Points d'attention</span><span>13</span></li>
+    <li><span><b>6</b> · Sécurité et RGPD</span><span>14</span></li>
+    <li><span><b>7</b> · Exploitation</span><span>15</span></li>
+    <li><span><b>8</b> · Recette</span><span>16</span></li>
+    <li><span><b>9</b> · Limites et suite</span><span>18</span></li>
+    <li><span><b>10</b> · Références</span><span>18</span></li>
+    <li><span>Conclusion</span><span>19</span></li>
+  </ol>
+  <h2>Annexes</h2>
+  <ol class="sub">
+    <li><span>A · Registre de traitement (RGPD)</span><span>20</span></li>
+    <li><span>B · Captures d'écran du service</span><span>21</span></li>
+    <li><span>C · Manifestes Kubernetes commentés</span><span>23</span></li>
+    <li><span>D · Procédure de réinstallation complète</span><span>24</span></li>
+    <li><span>E · Journal de recette brut</span><span>25</span></li>
+    <li><span>F · Usage de l'IA dans le projet</span><span>26</span></li>
+  </ol>
+</div>
+
+<!-- ============================================================ PRÉAMBULE -->
+<section class="part">
+  <h1>Préambule et introduction</h1>
+  <p><b>Objet du document.</b> Ce cahier des charges technique décrit l'infrastructure que nous avons construite pour
+  Rhénatech, les raisons de chaque choix, la manière de la refaire et ce qu'il faut surveiller. Il s'adresse à
+  l'équipe infrastructure de Rhénatech : un technicien qui ne nous connaît pas doit pouvoir réinstaller le service
+  avec ce document et le dépôt Git, sans autre aide.</p>
+  <p><b>Le problème.</b> La documentation de Rhénatech était éparpillée : procédures en PDF envoyées par courriel,
+  fiches clients sur un partage réseau, schémas dans des boîtes mail. En septembre, un prestataire a appliqué de nuit
+  une procédure périmée dans une clinique : quatre heures de coupure du réseau des urgences. La direction a décidé
+  une base documentaire unique, hébergée en interne et conteneurisée, avec deux publics bien séparés.</p>
+  <p><b>Ce que nous avons livré.</b> Une maquette fonctionnelle de BookStack et MariaDB orchestrés par Kubernetes (k3s),
+  accessible en HTTPS sur <code>wiki.rhenatech.lab</code>. Les prestataires y ont des comptes nominatifs protégés par
+  une double authentification TOTP et ne voient que les procédures d'intervention et les fiches des clients qui
+  leur sont attribués. L'ensemble se déploie de zéro avec une seule commande, <code>./scripts/deploy.sh</code>, se
+  sauvegarde chaque nuit, se restaure en moins de deux minutes et se met à jour avec retour arrière possible.</p>
+  <p><b>Méthode.</b> Le projet a suivi les sept jalons validés avec Claire Fischer (cadrage, socle, déploiement,
+  sécurité, exploitation, recette, finalisation). Le dossier a été écrit au fil de l'eau, un fichier par partie
+  dans <code>docs/</code>. Chaque exigence a un test automatisé : la recette R1 à R12 est rejouable par
+  <code>./scripts/recette.sh</code> et produit un journal daté.</p>
+
+  <h2>Planning suivi</h2>
+  <table>
+    <thead><tr><th style="width:16%">Jalon</th><th>Contenu</th><th style="width:30%">Preuve</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Cadrage</td><td>Reformulation du besoin, architecture logique et physique, dépôt Git</td><td>Note de cadrage validée (<code>docs/00-cadrage.md</code>)</td></tr>
+      <tr><td>2 · Socle infra</td><td>Cluster k3s, namespace, Ingress et certificat HTTPS, ConfigMap/Secret, PVC</td><td>R1</td></tr>
+      <tr><td>3 · Déploiement</td><td>Images versionnées, sondes readiness/liveness, NetworkPolicy, premier accès</td><td>R7, R8</td></tr>
+      <tr><td>4 · Rôles et sécurité</td><td>Profils Administrateur/Éditeur/Lecteur/Prestataire, cloisonnement, TOTP, journal d'audit</td><td>R2 à R5</td></tr>
+      <tr><td>5 · Exploitation</td><td>CronJob de sauvegarde, restauration chronométrée, mise à jour et retour arrière</td><td>R6, R10, R11, R12</td></tr>
+      <tr><td>6 · Recette</td><td>Exécution de R1 à R12, rédaction du cahier des charges</td><td>Journal de recette (annexe E)</td></tr>
+      <tr><td>7 · Finalisation</td><td>Relecture, diaporama, répétition de la démonstration</td><td>Ce dossier, la soutenance</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 1 -->
+<section class="part">
+  <h1><span class="num">1</span>Contexte et besoins</h1>
+  <p>Rhénatech (140 salariés, Colmar) maintient les réseaux, serveurs et postes de 60 clients : collectivités, PME,
+  deux cliniques. Ses astreintes de nuit et de week-end reposent sur 25 techniciens de trois sous-traitants, qui
+  interviennent au nom de Rhénatech avec ses procédures. Quatre profils d'utilisateurs sont prévus :</p>
+  <table>
+    <thead><tr><th>Profil</th><th>Qui</th><th>Nombre</th><th>Ce qu'ils voient et font</th><th>TOTP</th></tr></thead>
+    <tbody>
+      <tr><td><b>Administrateur</b></td><td>Direction infrastructure</td><td>3</td><td>Tout, dont comptes, rôles et journal d'audit</td><td>obligatoire</td></tr>
+      <tr><td><b>Éditeur</b></td><td>Techniciens Rhénatech</td><td>35</td><td>Créer et modifier pages internes et procédures</td><td>—</td></tr>
+      <tr><td><b>Lecteur</b></td><td>Autres salariés</td><td>102</td><td>Lire et chercher</td><td>—</td></tr>
+      <tr><td><b>Prestataire</b></td><td>Techniciens sous-traitants</td><td>25</td><td>Procédures d'intervention et fiches de <b>leurs</b> clients, rien d'autre</td><td>obligatoire</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Besoins et réponses</h2>
+  <table>
+    <thead><tr><th style="width:5%">Code</th><th style="width:27%">Besoin</th><th style="width:9%">Priorité</th><th>Notre réponse</th><th style="width:7%">Test</th></tr></thead>
+    <tbody>
+      <tr><td>B1</td><td>Wiki en HTTPS sur wiki.rhenatech.lab</td><td class="ind">Indisp.</td><td>Ingress Traefik, certificat signé par une autorité interne, TLS ≥ 1.2 (1.3 négocié), HSTS, HTTP redirigé en 301</td><td>R1</td></tr>
+      <tr><td>B2</td><td>Trois profils internes</td><td class="ind">Indisp.</td><td>Rôles Administrateur, Éditeur, Lecteur, créés et réglés par script (rôles par défaut renommés)</td><td>R2</td></tr>
+      <tr><td>B3</td><td>Prestataire cloisonné</td><td class="ind">Indisp.</td><td>Rôle Prestataire <b>sans aucune permission de rôle</b> + un rôle « Accès client – X » par client ; droits posés livre par livre</td><td>R3</td></tr>
+      <tr><td>B4</td><td>Comptes nominatifs, désactivés en fin de contrat</td><td class="ind">Indisp.</td><td>Un compte par technicien ; <code>disable-user.sh</code> retire les rôles, invalide le mot de passe, supprime MFA et sessions</td><td>R4</td></tr>
+      <tr><td>B5</td><td>TOTP obligatoire prestataires et admins</td><td class="ind">Indisp.</td><td>Option « authentification multifacteur obligatoire » sur Administrateur, Prestataire et rôles d'accès client</td><td>R4</td></tr>
+      <tr><td>B6</td><td>Journal d'audit</td><td class="ind">Indisp.</td><td>Journal natif de BookStack : connexions, créations, modifications, suppressions, changements de droits, avec IP</td><td>R5</td></tr>
+      <tr><td>B7</td><td>Structure de départ</td><td class="ind">Indisp.</td><td>Étagères Interne, Procédures d'intervention, Clients ; 3 livres clients ; 9 pages réelles dont « Restaurer le wiki »</td><td>init</td></tr>
+      <tr><td>B8</td><td>Recherche, pièces jointes de 20 Mo</td><td class="ind">Indisp.</td><td>Limite BookStack 25 Mo, PHP 25/30 Mo ; Traefik ne limite pas ; recherche filtrée par les droits</td><td>R6</td></tr>
+      <tr><td>B9</td><td>Volumes pour trois ans</td><td class="ind">Indisp.</td><td>PVC fichiers 15 Gi, base 5 Gi, sauvegardes 30 Gi (80 Gi en année 3) ; requests et limits (§ 1.1)</td><td>—</td></tr>
+      <tr><td>B10</td><td>Disponibilité : rien perdu au redémarrage</td><td class="ind">Indisp.</td><td>Données sur PVC, sondes, redémarrage automatique par Kubernetes</td><td>R7</td></tr>
+      <tr><td>B11</td><td>Sauvegarde quotidienne, RPO 24 h, RTO 4 h</td><td class="ind">Indisp.</td><td>CronJob à 02:00, export hors cluster, restauration complète mesurée en <b>87 s</b></td><td>R10</td></tr>
+      <tr><td>B12</td><td>RGPD</td><td class="ind">Indisp.</td><td>Données minimales, aucun appel externe, journal purgé à 365 jours, registre en annexe A</td><td>Ann. A</td></tr>
+      <tr><td>B13</td><td>Mise à jour sans perte, retour arrière, état en 1 min</td><td class="ind">Indisp.</td><td><code>upgrade.sh</code> (sauvegarde puis image), <code>rollback.sh</code> (image + restauration), <code>status.sh</code> (1,1 s)</td><td>R11, R12</td></tr>
+      <tr><td>B14</td><td>Réversibilité</td><td class="sou">Souhaité</td><td>Export HTML/PDF/Markdown natif ; réinstallation complète depuis le dépôt seul (annexe D)</td><td>R10</td></tr>
+      <tr><td>B15</td><td>Annuaire LDAP / OIDC</td><td class="sou">Souhaité</td><td>Non réalisé : partie 9</td><td>—</td></tr>
+      <tr><td>B16</td><td>Courriels</td><td class="sou">Souhaité</td><td>Non réalisé : courriels journalisés (<code>MAIL_DRIVER=log</code>), Mailpit prévu (partie 9)</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>1.1 Dimensionnement (B9)</h2>
+  <p>Hypothèses à trois ans : 5 000 pages, 10 Go de pièces jointes, 165 comptes, 40 connexions simultanées.</p>
+  <table>
+    <thead><tr><th style="width:20%">Ressource</th><th>Calcul</th><th style="width:22%">Retenu</th></tr></thead>
+    <tbody>
+      <tr><td>Fichiers (<code>/config</code>)</td><td>10 Go de pièces jointes + 50 % de marge (images des pages, croissance)</td><td><b>PVC 15 Gi</b></td></tr>
+      <tr><td>Base de données</td><td>5 000 pages × 20 Ko (HTML + Markdown) × 10 révisions en moyenne ≈ 1 Go (plafond <code>REVISION_LIMIT=50</code>) ; index de recherche ≈ 0,5 Go ; journal d'audit ≈ 2 000 évènements/jour × 365 j × 200 o ≈ 150 Mo</td><td><b>PVC 5 Gi</b> (marge × 2)</td></tr>
+      <tr><td>Sauvegardes</td><td>7 jours × (dump compressé ≤ 0,5 Go + archive des fichiers) : ≈ 25 Go en année 1 (3 Go de fichiers), ≈ 75 Go en année 3</td><td><b>PVC 30 Gi</b>, 80 Gi en année 3</td></tr>
+      <tr><td>BookStack</td><td>40 requêtes PHP simultanées × 25 Mo ≈ 1 Go au pic ; mesuré au repos : 84 Mio</td><td>req. 250m / 384 Mi · lim. 1 CPU / 1 Gi</td></tr>
+      <tr><td>MariaDB</td><td>Buffer pool 256 Mo + 100 connexions max ; mesuré au repos : 141 Mio</td><td>req. 250m / 512 Mi · lim. 1 CPU / 1 Gi</td></tr>
+      <tr><td>VM</td><td>Requests totales ≈ 0,6 CPU / 1 Gi + k3s ≈ 0,5 Gi + système</td><td>2 vCPU, 4 Go, 40 Go disque</td></tr>
+    </tbody>
+  </table>
+  <div class="note">Le provisionneur local-path de k3s <b>n'impose pas</b> la taille demandée par un PVC : c'est le disque de la VM qui
+  plafonne réellement. La surveillance de l'espace disque fait donc partie de l'exploitation (partie 7).</div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="part">
+  <h1><span class="num">2</span>Architecture</h1>
+  <h2>2.1 Schéma logique</h2>
+  <figure>
+  <svg viewBox="0 0 760 330" width="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#13325b"/></marker>
+      <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a8842c"/></marker>
+    </defs>
+    <!-- postes -->
+    <rect x="10" y="60" width="120" height="50" rx="6" fill="#fff" stroke="#13325b" stroke-width="1.5"/>
+    <text x="70" y="82" text-anchor="middle" font-size="12" font-weight="700">Salarié</text>
+    <text x="70" y="98" text-anchor="middle" font-size="10" fill="#5b6472">navigateur</text>
+    <rect x="10" y="150" width="120" height="58" rx="6" fill="#fff" stroke="#13325b" stroke-width="1.5"/>
+    <text x="70" y="172" text-anchor="middle" font-size="12" font-weight="700">Prestataire</text>
+    <text x="70" y="188" text-anchor="middle" font-size="10" fill="#5b6472">navigateur</text>
+    <text x="70" y="201" text-anchor="middle" font-size="10" fill="#5b6472">+ appli TOTP</text>
+    <!-- cluster -->
+    <rect x="160" y="10" width="590" height="310" rx="10" fill="#f2f7fc" stroke="#2f6db5" stroke-dasharray="6 4"/>
+    <text x="175" y="30" font-size="11" fill="#2f6db5" font-weight="700">cluster k3s</text>
+    <rect x="175" y="45" width="150" height="190" rx="8" fill="#fff" stroke="#9fb4cc"/>
+    <text x="250" y="62" text-anchor="middle" font-size="10" fill="#5b6472">namespace kube-system</text>
+    <rect x="188" y="78" width="125" height="78" rx="6" fill="#1f5e9e"/>
+    <text x="250" y="98" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">Traefik (Ingress)</text>
+    <text x="250" y="114" text-anchor="middle" font-size="9.5" fill="#dbe7f5">wiki.rhenatech.lab</text>
+    <text x="250" y="128" text-anchor="middle" font-size="9.5" fill="#dbe7f5">443 · TLS ≥ 1.2 · HSTS</text>
+    <text x="250" y="142" text-anchor="middle" font-size="9.5" fill="#dbe7f5">80 → 301 vers 443</text>
+    <rect x="188" y="172" width="125" height="44" rx="6" fill="#e8eef6" stroke="#9fb4cc"/>
+    <text x="250" y="198" text-anchor="middle" font-size="11">CoreDNS</text>
+    <!-- namespace wiki -->
+    <rect x="345" y="45" width="395" height="265" rx="8" fill="#fff" stroke="#b3261e" stroke-dasharray="3 3"/>
+    <text x="542" y="62" text-anchor="middle" font-size="10" fill="#b3261e">namespace wiki · NetworkPolicy : tout refusé sauf les flèches</text>
+    <rect x="360" y="78" width="160" height="78" rx="6" fill="#13325b"/>
+    <text x="440" y="98" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">BookStack</text>
+    <text x="440" y="114" text-anchor="middle" font-size="9.5" fill="#dbe7f5">Deployment · 1 réplica</text>
+    <text x="440" y="128" text-anchor="middle" font-size="9.5" fill="#dbe7f5">Recreate · sondes /status</text>
+    <text x="440" y="142" text-anchor="middle" font-size="9.5" fill="#dbe7f5">PVC 15 Gi /config</text>
+    <rect x="575" y="78" width="150" height="78" rx="6" fill="#13325b"/>
+    <text x="650" y="98" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">MariaDB 11.8</text>
+    <text x="650" y="114" text-anchor="middle" font-size="9.5" fill="#dbe7f5">StatefulSet mariadb-0</text>
+    <text x="650" y="128" text-anchor="middle" font-size="9.5" fill="#dbe7f5">Service headless</text>
+    <text x="650" y="142" text-anchor="middle" font-size="9.5" fill="#dbe7f5">PVC 5 Gi /var/lib/mysql</text>
+    <rect x="360" y="190" width="160" height="56" rx="6" fill="#fff" stroke="#13325b"/>
+    <text x="440" y="210" text-anchor="middle" font-size="11" font-weight="700">CronJob wiki-backup</text>
+    <text x="440" y="225" text-anchor="middle" font-size="9.5" fill="#5b6472">chaque nuit 02:00</text>
+    <text x="440" y="238" text-anchor="middle" font-size="9.5" fill="#5b6472">PVC 30 Gi · 7 jours</text>
+    <rect x="575" y="190" width="150" height="56" rx="6" fill="#fff" stroke="#13325b"/>
+    <text x="650" y="210" text-anchor="middle" font-size="11" font-weight="700">CronJob purge RGPD</text>
+    <text x="650" y="225" text-anchor="middle" font-size="9.5" fill="#5b6472">dimanche 03:30</text>
+    <text x="650" y="238" text-anchor="middle" font-size="9.5" fill="#5b6472">journal &gt; 365 jours</text>
+    <rect x="360" y="262" width="365" height="36" rx="6" fill="#fbf7ec" stroke="#a8842c"/>
+    <text x="542" y="284" text-anchor="middle" font-size="10">Secret wiki-secrets (APP_KEY, mots de passe) · ConfigMaps (config, scripts)</text>
+    <!-- flèches -->
+    <line x1="130" y1="85" x2="186" y2="105" stroke="#13325b" stroke-width="1.6" marker-end="url(#a)"/>
+    <line x1="130" y1="178" x2="186" y2="130" stroke="#13325b" stroke-width="1.6" marker-end="url(#a)"/>
+    <text x="140" y="140" font-size="9" fill="#13325b">HTTPS</text>
+    <line x1="313" y1="117" x2="358" y2="117" stroke="#13325b" stroke-width="1.6" marker-end="url(#a)"/>
+    <text x="318" y="110" font-size="9" fill="#13325b">HTTP 80</text>
+    <line x1="520" y1="117" x2="573" y2="117" stroke="#13325b" stroke-width="1.6" marker-end="url(#a)"/>
+    <text x="527" y="110" font-size="9" fill="#13325b">3306</text>
+    <line x1="520" y1="205" x2="590" y2="158" stroke="#13325b" stroke-width="1.3" marker-end="url(#a)"/>
+    <line x1="650" y1="190" x2="650" y2="158" stroke="#13325b" stroke-width="1.3" marker-end="url(#a)"/>
+    <line x1="440" y1="190" x2="440" y2="158" stroke="#a8842c" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+    <text x="446" y="177" font-size="8.5" fill="#a8842c">lecture seule</text>
+  </svg>
+  <figcaption>Figure 1 · Composants et flux. Le CronJob de sauvegarde lit /config en lecture seule et interroge MariaDB ; l'export copie les sauvegardes sur le poste d'administration.</figcaption>
+  </figure>
+
+  <h2>2.2 Schéma physique</h2>
+  <figure>
+  <svg viewBox="0 0 760 250" width="100%" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="750" height="240" rx="10" fill="#f6f7f9" stroke="#8a94a3"/>
+    <text x="20" y="25" font-size="11" font-weight="700" fill="#384356">Hyperviseur : VirtualBox sur le poste (ou Proxmox des TP) · réseau hôte 192.168.56.0/24 (RFC 1918)</text>
+    <rect x="20" y="40" width="430" height="190" rx="8" fill="#fff" stroke="#13325b" stroke-width="1.5"/>
+    <text x="235" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#13325b">VM k3s-1 · Debian 13 · 2 vCPU · 4 Go RAM · 40 Go</text>
+    <text x="35" y="82" font-size="10">carte 1 : NAT (sortie Internet pour les images et NTP)</text>
+    <text x="35" y="97" font-size="10">carte 2 : réseau hôte <tspan font-weight="700">192.168.56.10</tspan></text>
+    <rect x="35" y="108" width="400" height="56" rx="5" fill="#e8eef6"/>
+    <text x="235" y="128" text-anchor="middle" font-size="10.5" font-weight="700">k3s v1.35.10 : plan de contrôle + nœud</text>
+    <text x="235" y="143" text-anchor="middle" font-size="9.5">Traefik · CoreDNS · local-path · metrics-server · kube-router</text>
+    <text x="235" y="156" text-anchor="middle" font-size="9.5" fill="#5b6472">pods 10.42.0.0/16 · services 10.43.0.0/16</text>
+    <rect x="35" y="172" width="400" height="46" rx="5" fill="#fbf7ec" stroke="#a8842c"/>
+    <text x="235" y="190" text-anchor="middle" font-size="10">/var/lib/rancher/k3s/storage : 3 volumes local-path</text>
+    <text x="235" y="205" text-anchor="middle" font-size="9.5" fill="#5b6472">bookstack-config 15 Gi · data-mariadb-0 5 Gi · wiki-backups 30 Gi</text>
+    <rect x="490" y="45" width="250" height="78" rx="8" fill="#fff" stroke="#13325b"/>
+    <text x="615" y="65" text-anchor="middle" font-size="11" font-weight="700">Poste d'administration</text>
+    <text x="615" y="82" text-anchor="middle" font-size="9.5">kubectl · dépôt Git</text>
+    <text x="615" y="96" text-anchor="middle" font-size="9.5">.secrets/ (coffre) · backups/ (exports)</text>
+    <text x="615" y="110" text-anchor="middle" font-size="9.5" fill="#5b6472">→ 6443 (API k3s)</text>
+    <rect x="490" y="140" width="250" height="78" rx="8" fill="#fff" stroke="#13325b"/>
+    <text x="615" y="160" text-anchor="middle" font-size="11" font-weight="700">Navigateur des utilisateurs</text>
+    <text x="615" y="177" text-anchor="middle" font-size="9.5">hosts : 192.168.56.10 wiki.rhenatech.lab</text>
+    <text x="615" y="191" text-anchor="middle" font-size="9.5">autorité « Rhenatech Lab Root CA » importée</text>
+    <text x="615" y="205" text-anchor="middle" font-size="9.5" fill="#5b6472">→ 443 (et 80 redirigé)</text>
+    <line x1="490" y1="84" x2="452" y2="95" stroke="#13325b" stroke-width="1.5"/>
+    <line x1="490" y1="179" x2="452" y2="140" stroke="#13325b" stroke-width="1.5"/>
+  </svg>
+  <figcaption>Figure 2 · Maquette sur une VM. Variante à trois VM (k3s-1 serveur, k3s-2 et k3s-3 agents, 192.168.56.11 à .13) possible sans changer le dépôt.</figcaption>
+  </figure>
+
+  <h2>2.3 Matrice des flux</h2>
+  <p>Chaque ligne correspond à une NetworkPolicy de <code>k8s/networkpolicies.yaml</code>. Tout ce qui n'y figure pas est refusé.</p>
+  <table>
+    <thead><tr><th>Source</th><th>Destination</th><th>Port</th><th>Pourquoi</th><th>Contrôle</th></tr></thead>
+    <tbody>
+      <tr><td>Postes</td><td>Traefik (nœud)</td><td>443, 80/TCP</td><td>Accès au wiki ; 80 ne fait que rediriger</td><td>Ingress <code>wiki</code>, <code>wiki-http-redirect</code></td></tr>
+      <tr><td>Traefik (kube-system)</td><td>bookstack</td><td>80/TCP</td><td>Proxy inverse (TLS terminé par Traefik)</td><td><code>bookstack-from-traefik</code></td></tr>
+      <tr><td>bookstack</td><td>mariadb</td><td>3306/TCP</td><td>Base de l'application</td><td><code>bookstack-to-mariadb</code>, <code>mariadb-from-clients</code></td></tr>
+      <tr><td>Jobs sauvegarde, restauration, purge</td><td>mariadb</td><td>3306/TCP</td><td>Exploitation (exception justifiée)</td><td><code>jobs-to-mariadb</code>, <code>mariadb-from-clients</code></td></tr>
+      <tr><td>Tous les pods de <code>wiki</code></td><td>CoreDNS</td><td>53/UDP+TCP</td><td>Résolution de noms</td><td><code>allow-dns-egress</code></td></tr>
+      <tr><td>Tout le reste, dont Internet</td><td>—</td><td>—</td><td>Refusé</td><td><code>default-deny-all</code></td></tr>
+    </tbody>
+  </table>
+  <p>BookStack n'a <b>aucune sortie vers Internet</b> : l'appel à Gravatar est coupé (<code>AVATAR_URL=false</code>) et les
+  courriels sont journalisés. État réel du namespace après déploiement :</p>
+<pre><code>$ kubectl -n wiki get pods,svc,pvc,ingress
+pod/bookstack-84fb95b466-t4ttb   1/1  Running   10.42.0.167
+pod/mariadb-0                    1/1  Running   10.42.0.165
+service/bookstack   ClusterIP  10.43.43.105  80/TCP
+service/mariadb     ClusterIP  None          3306/TCP     <span class="c"># headless</span>
+persistentvolumeclaim/bookstack-config  Bound  15Gi  RWO  local-path
+persistentvolumeclaim/data-mariadb-0    Bound   5Gi  RWO  local-path
+persistentvolumeclaim/wiki-backups      Bound  30Gi  RWO  local-path
+ingress/wiki                traefik  wiki.rhenatech.lab  80, 443
+ingress/wiki-http-redirect  traefik  wiki.rhenatech.lab  80</code></pre>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="part">
+  <h1><span class="num">3</span>Choix et justifications : le pourquoi</h1>
+  <p>Pour chaque décision importante : ce que nous avons retenu, l'alternative écartée et la raison, rapportée au
+  contexte de Rhénatech (une maquette sur une VM de 4 Go, 165 comptes, un usage de nuit par des prestataires).</p>
+  <table>
+    <thead><tr><th style="width:15%">Question</th><th style="width:20%">Notre choix</th><th style="width:15%">Écarté</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td>Orchestrateur</td><td><b>k3s</b> v1.35</td><td>kubeadm, Docker Compose</td><td>Un seul binaire, ~512 Mo de RAM. Traefik, stockage local-path, metrics-server et NetworkPolicy (kube-router) sont fournis : rien à ajouter sur une VM de 4 Go. Compose n'est accepté que comme étape.</td></tr>
+      <tr><td>Outil de déploiement</td><td><b>Kustomize</b> (<code>kubectl apply -k</code>) + script</td><td>Helm (option O1)</td><td>Intégré à kubectl, manifestes lisibles tels quels. Le générateur de ConfigMaps ajoute un hachage au nom : toute modification de configuration redéploie BookStack. Helm apporterait un paramétrage multi-environnements inutile ici.</td></tr>
+      <tr><td>Image BookStack</td><td><b>lscr.io/linuxserver/bookstack</b> <code>v26.09.2-ls296</code></td><td>Image tierce, image maison</td><td>La plus suivie, publiée à chaque version, migre le schéma au démarrage. L'étiquette <code>vX-lsN</code> désigne un build précis (« version-vX » bouge à chaque rebuild). Contrepartie : démarre en root, d'où Pod Security « baseline ».</td></tr>
+      <tr><td>Image MariaDB</td><td><b>mariadb:11.8.9</b> (LTS)</td><td>MySQL 8, MariaDB 12</td><td>Image officielle, support long jusqu'en 2028, script <code>healthcheck.sh</code> intégré pour les sondes.</td></tr>
+      <tr><td>Objet pour MariaDB</td><td><b>StatefulSet</b> (1 réplica) + Service headless</td><td>Deployment + PVC</td><td>Identité stable <code>mariadb-0</code> ; PVC créé par <code>volumeClaimTemplates</code> et <b>conservé si la StatefulSet est supprimée</b> ; jamais deux pods sur le volume. À un réplica l'écart est faible, mais la donnée est mieux protégée et une réplication reste possible.</td></tr>
+      <tr><td>Objet pour BookStack</td><td><b>Deployment, stratégie Recreate</b></td><td>RollingUpdate</td><td>RollingUpdate lancerait le nouveau pod avant d'arrêter l'ancien : deux pods sur un volume RWO et deux migrations de schéma concurrentes. Recreate coûte ~15 s de coupure par mise à jour (mesuré).</td></tr>
+      <tr><td>Stockage</td><td><b>local-path</b> (PVC RWO)</td><td>NFS, Longhorn</td><td>Fourni par k3s, performances du disque local. Longhorn demande ~1 Go de RAM par nœud et trois nœuds ; NFS un serveur de plus. Le prix : volume lié au nœud (partie 5).</td></tr>
+      <tr><td>Exposition</td><td><b>Ingress Traefik</b> + TLSOption + Middlewares</td><td>NodePort, ingress-nginx</td><td>Contrôleur déjà présent dans k3s ; aucune limite de taille de requête (pièces de 20 Mo).</td></tr>
+      <tr><td>Certificat</td><td><b>Autorité interne</b> générée par script (ECDSA P-256, CA 10 ans, serveur 397 j)</td><td>Let's Encrypt, auto-signé seul, cert-manager (O6)</td><td>ACME (RFC 8555) exige un nom public : impossible en <code>.lab</code>. Une autorité (RFC 5280) s'importe une fois sur les postes et signe les certificats suivants, contrairement à un certificat auto-signé isolé.</td></tr>
+      <tr><td>Secrets</td><td><b>Secret Kubernetes</b> créé par script depuis <code>.secrets/</code> (hors Git)</td><td>Sealed Secrets, SOPS, Vault</td><td>Aucun outil de plus pour une maquette ; <code>secret.exemple.yaml</code> documente la forme avec des valeurs factices.</td></tr>
+      <tr><td>Sauvegarde</td><td><b>CronJob</b> : <code>mariadb-dump --single-transaction</code> + archive de <code>/config</code>, 7 jours, <b>export hors cluster</b></td><td>Velero, instantané de volume</td><td>Dump logique cohérent sans arrêt du service, restaurable sur une autre version de MariaDB, lisible et vérifiable (sha256). Velero demande un stockage objet (option A2).</td></tr>
+      <tr><td>Cloisonnement</td><td><b>Rôle Prestataire sans droit</b> + <b>un rôle par client</b>, droits <b>livre par livre</b></td><td>Un rôle par sous-traitant ; droits par étagère</td><td>Les droits d'une étagère ne descendent pas à ses livres dans BookStack. Un rôle par client suit l'énoncé (« les clients qui <i>lui</i> sont attribués ») : deux techniciens d'un même sous-traitant peuvent avoir des clients différents. Par défaut un prestataire ne voit rien.</td></tr>
+      <tr><td>Double authentification</td><td><b>TOTP natif</b>, obligatoire par rôle</td><td>OIDC + MFA (O2)</td><td>Natif, sans composant supplémentaire, conforme à la RFC 6238.</td></tr>
+      <tr><td>Désactivation</td><td><b>Script</b> (rôles retirés, mot de passe aléatoire, MFA et sessions supprimés)</td><td>Suppression du compte</td><td>BookStack n'a pas d'état « désactivé ». Supprimer le compte rendrait le journal moins lisible ; on le neutralise et on le garde. Sessions en base pour pouvoir les couper.</td></tr>
+      <tr><td>Configuration de BookStack</td><td><b>Script d'API idempotent</b></td><td>Clics dans l'interface</td><td>Reproductible (R10), relu, rejouable sans doublon. Le jeton d'API est temporaire (créé en base, supprimé en fin de script).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="part">
+  <h1><span class="num">4</span>Mise en œuvre : le comment</h1>
+  <h2>4.1 Structure du dépôt</h2>
+<pre><code>sae11/
+├── README.md, Makefile           installer · exploiter · raccourcis make
+├── k8s/                          <span class="c">kubectl apply -k k8s/</span>
+│   ├── kustomization.yaml        images épinglées, ConfigMaps générées (hachage)
+│   ├── namespace.yaml            namespace wiki, Pod Security baseline
+│   ├── mariadb.yaml              StatefulSet + Service headless + PVC 5 Gi
+│   ├── bookstack.yaml            Deployment Recreate + Service + PVC 15 Gi
+│   ├── ingress.yaml              Ingress HTTPS, redirection 80→443, HSTS, TLS ≥ 1.2
+│   ├── networkpolicies.yaml      refus par défaut + 5 flux autorisés
+│   ├── backup.yaml               CronJob sauvegarde + CronJob purge RGPD + PVC 30 Gi
+│   └── config/                   bookstack.env · php-local.ini · mariadb.cnf · backup.sh · purge-audit.sh
+├── scripts/                      deploy · gen-secrets · init-bookstack · status · backup-now
+│                                 backup-export · restore · upgrade · rollback · disable-user
+│                                 recette · r10-disaster · destroy · totp.py
+├── secrets/secret.exemple.yaml   forme des Secrets, valeurs factices
+└── docs/                         cadrage, cahier des charges, recette, oral, ce rapport
+<span class="c">(.secrets/ et backups/ : générés localement, ignorés par Git)</span></code></pre>
+
+  <h2>4.2 Les étapes de déploiement</h2>
+<pre><code><span class="c"># 1. Sur la VM : k3s à une version précise, horloge synchronisée (le TOTP en dépend)</span>
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.35.10+k3s1 sh -
+sudo timedatectl set-ntp true
+<span class="c"># 2. Sur le poste d'administration : copier /etc/rancher/k3s/k3s.yaml (adresse 192.168.56.10)</span>
+<span class="c"># 3. Tout le reste, en une commande :</span>
+./scripts/deploy.sh</code></pre>
+  <p><code>deploy.sh</code> enchaîne cinq étapes, en <b>86 secondes mesurées</b> sur un cluster vierge :</p>
+  <table>
+    <thead><tr><th style="width:5%">#</th><th style="width:25%">Étape</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Secrets locaux</td><td><code>gen-secrets.sh</code> : <code>APP_KEY</code> (« base64: » + 32 octets aléatoires), mots de passe MariaDB, autorité interne et certificat de <code>wiki.rhenatech.lab</code>, dans <code>.secrets/</code>. Rien n'est régénéré s'il existe déjà.</td></tr>
+      <tr><td>2</td><td>Namespace</td><td><code>kubectl apply -f k8s/namespace.yaml</code></td></tr>
+      <tr><td>3</td><td>Secrets Kubernetes</td><td><code>wiki-secrets</code> et <code>wiki-tls</code> créés par <code>kubectl create … --dry-run=client -o yaml | kubectl apply -f -</code> (idempotent)</td></tr>
+      <tr><td>4</td><td>Manifestes</td><td><code>kubectl apply -k k8s/</code> puis attente des sondes (<code>rollout status</code>)</td></tr>
+      <tr><td>5</td><td>Configuration de BookStack</td><td><code>init-bookstack.sh</code> : rôles, TOTP, étagères, livres, pages, permissions, comptes (via l'API REST)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4.3 Ce qui compte dans les manifestes</h2>
+<pre><code><span class="c"># bookstack.yaml : secrets par référence, sondes adaptées à la migration du schéma</span>
+envFrom: [{ configMapRef: { name: bookstack-env } }]        <span class="c"># APP_URL, DB_HOST, limites…</span>
+env:
+  - { name: APP_KEY, valueFrom: { secretKeyRef: { name: wiki-secrets, key: APP_KEY } } }
+startupProbe:   { httpGet: { path: /status, port: http }, failureThreshold: 36 }  <span class="c"># jusqu'à 6 min de migration</span>
+readinessProbe: { httpGet: { path: /status, port: http } }    <span class="c"># base + cache + session</span>
+livenessProbe:  { tcpSocket: { port: http } }                 <span class="c"># ne dépend PAS de la base</span></code></pre>
+  <p>La sonde de vie ne teste pas la base : si MariaDB tombe, BookStack devient « non prêt » (retiré du Service)
+  mais n'est pas redémarré en boucle, et il revient seul avec la base. La sonde de démarrage laisse six minutes à
+  BookStack pour migrer son schéma après une mise à jour.</p>
+<pre><code><span class="c"># ingress.yaml : HTTPS seul, TLS 1.2 minimum, HSTS</span>
+traefik.ingress.kubernetes.io/router.entrypoints: websecure
+traefik.ingress.kubernetes.io/router.tls.options: wiki-tls-modern@kubernetescrd    <span class="c"># minVersion VersionTLS12</span>
+traefik.ingress.kubernetes.io/router.middlewares: wiki-security-headers@kubernetescrd  <span class="c"># HSTS 1 an</span>
+<span class="c"># kustomization.yaml : jamais latest</span>
+images:
+  - { name: lscr.io/linuxserver/bookstack, newTag: v26.09.2-ls296 }
+  - { name: mariadb, newTag: 11.8.9 }</code></pre>
+
+  <h2>4.4 Configuration de BookStack : rôles, permissions, TOTP</h2>
+  <p>Réalisée par <code>scripts/init-bookstack.sh</code> via l'API REST. Le script est rejouable : ce qui existe déjà
+  est mis à jour, jamais dupliqué. L'administrateur par défaut <code>admin@admin.com</code> / <code>password</code> est
+  renommé et reçoit un mot de passe aléatoire dès le déploiement.</p>
+  <table>
+    <thead><tr><th>Rôle</th><th>Permissions de rôle</th><th>TOTP</th><th>Comptes de démonstration</th></tr></thead>
+    <tbody>
+      <tr><td><b>Administrateur</b> (rôle système)</td><td>Toutes</td><td class="ok">oui</td><td>admin@rhenatech.lab, claire.fischer@rhenatech.lab</td></tr>
+      <tr><td><b>Éditeur</b></td><td>Créer, modifier, supprimer contenus, pièces jointes, commentaires</td><td>non</td><td>editeur@rhenatech.lab</td></tr>
+      <tr><td><b>Lecteur</b></td><td>Voir tout, exporter</td><td>non</td><td>lecteur@rhenatech.lab</td></tr>
+      <tr><td><b>Prestataire</b></td><td><b>Aucune</b></td><td class="ok">oui</td><td>tech1@alpha-reseaux.example, tech1@beta-systemes.example</td></tr>
+      <tr><td><b>Accès client – X</b> (×3)</td><td><b>Aucune</b> (sert d'étiquette d'accès)</td><td class="ok">oui</td><td>Alpha → Clinique des Tilleuls · Beta → Commune de Val-d'Ill + Brasserie Lauch</td></tr>
+      <tr><td>Public (anonyme)</td><td><b>Aucune</b></td><td>—</td><td>Inscription publique fermée</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th style="width:40%">Contenu</th><th>Permissions posées (les autres rôles gardent leurs droits de rôle)</th></tr></thead>
+    <tbody>
+      <tr><td>Étagère <b>Interne</b> ; livres Exploitation du wiki, Ressources humaines, Commercial</td><td>Refus explicite à Prestataire et aux 3 rôles d'accès client (défense en profondeur)</td></tr>
+      <tr><td>Étagère <b>Procédures d'intervention</b> ; livre Procédures réseau</td><td>Lecture seule pour Prestataire</td></tr>
+      <tr><td>Étagère <b>Clients</b></td><td>Lecture pour Prestataire (l'étagère, pas ses livres)</td></tr>
+      <tr><td>Livre <b>Client – X</b></td><td>Lecture seule pour le rôle « Accès client – X » uniquement</td></tr>
+    </tbody>
+  </table>
+  <div class="grid2">
+    <figure><div class="crop"><img src="captures/10-admin-role-prestataire.png"></div>
+      <figcaption>Figure 3 · Rôle Prestataire : MFA obligatoire coché, aucune permission système ni de ressource.</figcaption></figure>
+    <figure><img src="captures/11-admin-permissions-livre-client.png">
+      <figcaption>Figure 4 · Livre « Client – Clinique des Tilleuls » : seule la lecture est ouverte au rôle d'accès de ce client.</figcaption></figure>
+  </div>
+  <p>Visibilité calculée par le moteur de permissions de BookStack (table <code>joint_permissions</code>, statuts
+  « autorisé ») pour les deux prestataires de démonstration :</p>
+<pre><code>tech1@alpha-reseaux.example   étagères : Clients, Procédures d'intervention
+                              livres   : Client – Clinique des Tilleuls, Procédures réseau
+tech1@beta-systemes.example   étagères : Clients, Procédures d'intervention
+                              livres   : Client – Brasserie Lauch, Client – Commune de Val-d'Ill,
+                                         Procédures réseau
+<span class="c"># ni Interne, ni Commercial, ni RH, ni les clients des autres — et la recherche ne les renvoie pas</span></code></pre>
+  <p><b>Ajouter un prestataire</b> : Paramètres › Utilisateurs › Ajouter un utilisateur, courriel nominatif, rôles
+  <i>Prestataire</i> + <i>Accès client – &lt;ses clients&gt;</i>. À sa première connexion, BookStack lui impose d'enrôler
+  son application TOTP. <b>Ajouter un client</b> : compléter la liste <code>CLIENTS</code> du script et le relancer.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="part">
+  <h1><span class="num">5</span>Points d'attention</h1>
+  <div class="warn"><b>APP_KEY.</b> Elle chiffre les sessions et les secrets TOTP stockés en base. Perdue ou changée, la base se
+  restaure, mais <b>tous les utilisateurs doivent ré-enrôler leur TOTP</b>. Elle est générée une seule fois, conservée dans
+  <code>.secrets/wiki-secrets.env</code> (hors Git, à copier dans un coffre hors ligne) et jamais régénérée par un
+  redéploiement. Vérifié : après la restauration complète (R10), le TOTP du prestataire fonctionne toujours.</div>
+  <div class="warn"><b>APP_URL.</b> Elle doit valoir exactement <code>https://wiki.rhenatech.lab</code>, sans barre finale. Une autre
+  adresse (IP, http, port) donne des redirections en boucle, des images cassées et des liens faux. Changer d'adresse
+  après coup se fait avec <code>php artisan bookstack:update-url</code>. Traefik termine le TLS :
+  <code>APP_PROXIES=10.42.0.0/16</code> fait confiance à ses en-têtes.</div>
+  <div class="warn"><b>Volume lié à un nœud.</b> local-path écrit sur le disque d'un nœud (RWO) : si ce nœud tombe, le pod reste
+  <i>Pending</i> jusqu'à son retour ou une restauration ailleurs. Restauration complète sur plateforme neuve mesurée
+  en <b>87 s</b> (R10). Limite assumée ; parade : stockage partagé (Longhorn, NFS) et deux réplicas (A3).</div>
+  <div class="warn"><b>Sauvegarde cohérente.</b> <code>--single-transaction</code> lit un instantané InnoDB cohérent <b>sans bloquer les
+  écritures</b> ; les fichiers sont archivés juste après. Une pièce jointe ajoutée entre les deux peut exister sans sa
+  ligne en base (fichier orphelin, sans gravité). Piège rencontré : en <code>sh</code>, <code>mariadb-dump | gzip</code>
+  « réussit » même si le dump échoue. Le script tourne en <code>bash</code> avec <code>pipefail</code> et vérifie la
+  ligne finale <code>-- Dump completed</code>.</div>
+  <div class="warn"><b>NetworkPolicy et pods neufs.</b> kube-router met quelques secondes à autoriser l'adresse d'un pod qui vient de
+  naître : notre première sauvegarde n'a pas joint MariaDB. Les jobs attendent désormais que la base réponde
+  (<code>mariadb-admin ping</code>, 60 s au plus). Après un « tout refusé », il faut aussi penser au DNS (53 UDP et TCP).</div>
+  <div class="warn"><b>Mise à jour et schéma de base.</b> Au démarrage, une nouvelle version de BookStack migre le schéma ; l'ancienne
+  image ne sait pas revenir en arrière. <b>Retour arrière = ancienne image + restauration de la sauvegarde prise juste
+  avant</b> : <code>upgrade.sh</code> la prend et la note, <code>rollback.sh</code> l'utilise. Ce qui a été modifié entre
+  les deux est perdu : il faut décider vite.</div>
+  <div class="warn"><b>Droits sur les étagères.</b> Les permissions d'une étagère ne s'appliquent pas à ses livres, seulement à
+  l'affichage de l'étagère. Il faut les poser sur chaque livre : c'est ce que fait le script, et ce que vérifie R3
+  avec un vrai compte prestataire.</div>
+  <div class="warn"><b>Horloge et TOTP (RFC 6238).</b> Le code change toutes les 30 s ; une VM ou un téléphone décalé de plus de
+  30 s environ voit tous ses codes refusés. NTP est activé sur la VM, et la recette le démontre : un code calculé avec
+  120 s d'avance est refusé, le code à l'heure est accepté. Premier réflexe si un prestataire est refusé :
+  <code>timedatectl</code> sur la VM, puis l'heure de son téléphone.</div>
+  <div class="warn"><b>IPv6 désactivé.</b> Sur un nœud sans IPv6, nginx (image linuxserver) refuse de démarrer sur
+  <code>listen [::]:80</code>. Le script d'initialisation <code>10-rhenatech-init.sh</code> retire alors l'écoute IPv6.</div>
+  <div class="warn"><b>Taille des pièces jointes.</b> Trois limites à lever : BookStack (<code>FILE_UPLOAD_SIZE_LIMIT</code>, en Mo),
+  PHP (<code>upload_max_filesize</code>, <code>post_max_size</code>) et le proxy (Traefik : aucune limite ; ingress-nginx :
+  <code>proxy-body-size</code>). Testé : 15 Mo acceptés, 25 Mo refusés proprement (HTTP 422).</div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="part">
+  <h1><span class="num">6</span>Sécurité et RGPD</h1>
+  <h2>6.1 Mesures de sécurité</h2>
+  <table>
+    <thead><tr><th style="width:15%">Domaine</th><th>Mesure</th></tr></thead>
+    <tbody>
+      <tr><td>Flux</td><td>Refus par défaut en entrée et en sortie dans <code>wiki</code> ; seuls les flux de la matrice 2.3 sont ouverts. Testé : un pod sans étiquette autorisée ne joint pas MariaDB (R8).</td></tr>
+      <tr><td>Chiffrement</td><td>HTTPS seul (HTTP redirigé en 301, RFC 9110) ; TLS 1.2 minimum, TLS 1.3 négocié (RFC 8446) ; HSTS d'un an (RFC 6797) ; <code>sniStrict</code>.</td></tr>
+      <tr><td>Certificats</td><td>Autorité interne ECDSA P-256 (<code>CA:TRUE, pathlen:0</code>), certificat serveur de 397 jours avec SAN et usage serverAuth (RFC 5280) ; clés privées hors Git.</td></tr>
+      <tr><td>Secrets</td><td>Secret Kubernetes référencé par <code>secretKeyRef</code> ; mot de passe root MariaDB connu de MariaDB et du seul job de restauration ; mots de passe passés par la variable <code>MYSQL_PWD</code> (absents de la liste des processus) ; <code>.secrets/</code> en 0700, ignoré par Git ; contrôle R9.</td></tr>
+      <tr><td>Authentification</td><td>Comptes nominatifs ; TOTP obligatoire pour Administrateur, Prestataire et rôles d'accès client (RFC 6238) ; compte par défaut neutralisé ; inscription publique et accès anonyme fermés ; cookie de session <code>Secure</code>.</td></tr>
+      <tr><td>Autorisation</td><td>Prestataire sans droit de rôle, accès ouvert livre par livre ; refus explicite sur Interne.</td></tr>
+      <tr><td>Fin de contrat</td><td><code>disable-user.sh</code> : effet immédiat (rôles retirés, sessions supprimées) ; le compte reste lisible dans le journal.</td></tr>
+      <tr><td>Traçabilité</td><td>Journal d'audit (connexions, contenus, droits, comptes, adresse IP), réservé aux administrateurs (figure 9).</td></tr>
+      <tr><td>Pods</td><td><code>seccomp RuntimeDefault</code>, <code>allowPrivilegeEscalation: false</code>, jeton de compte de service non monté ; MariaDB et jobs en non-root avec toutes les capacités retirées ; namespace en Pod Security <b>baseline</b> imposé et <b>restricted</b> en audit.</td></tr>
+      <tr><td>Images</td><td>Officielles, épinglées, jamais <code>latest</code>.</td></tr>
+    </tbody>
+  </table>
+  <div class="info">Écart assumé : l'image linuxserver démarre en root (superviseur s6) avant de lancer nginx et php-fpm sous l'uid 1000.
+  Elle ne passe donc pas le profil « restricted ». Parade : une image BookStack non-root construite par nos soins (partie 9).</div>
+
+  <h2>6.2 Données personnelles</h2>
+  <p>Le wiki contient : nom, courriel professionnel, rôles, empreinte bcrypt du mot de passe, secret TOTP (chiffré par
+  l'<code>APP_KEY</code>), adresse IP et date des connexions et actions (journal d'audit), sessions. Aucune donnée client
+  sensible dans les pages d'exemple : clients fictifs, aucun nom de personne, aucun numéro. BookStack n'envoie rien
+  à l'extérieur (pas d'avatar Gravatar, aucune sortie réseau).</p>
+  <table>
+    <thead><tr><th>Donnée</th><th>Durée de conservation</th><th>Mise en œuvre</th></tr></thead>
+    <tbody>
+      <tr><td>Journal d'audit</td><td>365 jours</td><td>CronJob <code>wiki-audit-purge</code> chaque dimanche</td></tr>
+      <tr><td>Compte prestataire</td><td>Désactivé le jour de la fin de contrat, supprimé un an après</td><td><code>disable-user.sh</code>, puis suppression dans l'interface</td></tr>
+      <tr><td>Compte salarié</td><td>Supprimé au départ (contenus réattribués)</td><td>Interface d'administration</td></tr>
+      <tr><td>Sauvegardes</td><td>7 jours sur le cluster ; 30 jours conseillés pour les exports</td><td>Rétention du script de sauvegarde</td></tr>
+    </tbody>
+  </table>
+  <p>Le registre de traitement complet (article 30 du RGPD) est en annexe A.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="part">
+  <h1><span class="num">7</span>Exploitation</h1>
+  <table>
+    <thead><tr><th style="width:16%">Geste</th><th>Comment</th><th style="width:16%">Mesuré</th></tr></thead>
+    <tbody>
+      <tr><td>Sauvegarde</td><td>CronJob <code>wiki-backup</code> à 02:00 (Europe/Paris) : dump cohérent + archive de <code>/config</code>, sha256, rétention 7 jours (RPO ≤ 24 h). À la demande : <code>./scripts/backup-now.sh</code></td><td>3 s (16 Mo)</td></tr>
+      <tr><td>Copie hors cluster</td><td><code>./scripts/backup-export.sh</code> → <code>backups/AAAAMMJJ-HHMMSS/</code> sur le poste d'administration, sommes de contrôle vérifiées. À planifier chaque jour et à recopier sur un support externe</td><td>—</td></tr>
+      <tr><td>Restauration</td><td><code>./scripts/restore.sh &lt;sauvegarde&gt;</code> : BookStack arrêté, base supprimée et rechargée, <code>/config</code> réextrait, redémarrage, chronomètre</td><td><b>20 s</b> sur place · <b>61 s</b> depuis un export</td></tr>
+      <tr><td>Reprise après sinistre</td><td>Namespace supprimé → <code>deploy.sh --no-init</code> → <code>restore.sh backups/…</code> (<code>r10-disaster.sh</code>)</td><td><b>87 s</b> (exigé : 4 h)</td></tr>
+      <tr><td>Mise à jour</td><td><code>./scripts/upgrade.sh v26.09.3-ls301</code> : sauvegarde, nouvelle image, attente des sondes, contrôle <code>/status</code> ; reporter ensuite l'étiquette dans <code>kustomization.yaml</code></td><td><b>15 s</b> de coupure</td></tr>
+      <tr><td>Retour arrière</td><td><code>./scripts/rollback.sh</code> : ancienne image + restauration de la sauvegarde d'avant mise à jour</td><td><b>23 s</b></td></tr>
+      <tr><td>Supervision</td><td><code>./scripts/status.sh</code> : pods, PVC, Ingress, <code>kubectl top</code>, <code>/status</code>, échéance du certificat, dernières sauvegardes, journaux, événements</td><td><b>1,1 s</b></td></tr>
+      <tr><td>Fin de contrat</td><td><code>./scripts/disable-user.sh &lt;courriel&gt;</code></td><td>immédiat</td></tr>
+      <tr><td>Certificat</td><td>Supprimer <code>.secrets/tls/tls.*</code> puis relancer <code>deploy.sh</code> : même autorité, nouveau certificat</td><td>—</td></tr>
+    </tbody>
+  </table>
+<pre><code>$ ./scripts/status.sh            <span class="c"># extrait</span>
+== Santé applicative (https://wiki.rhenatech.lab/status) ==
+{"database":true,"cache":true,"session":true}  (HTTP 200, 0.03s)
+== Consommation ==
+bookstack-84fb95b466-t4ttb   2m   84Mi
+mariadb-0                    4m   141Mi
+== Certificat ==
+subject=O=Rhenatech, CN=wiki.rhenatech.lab   notAfter=Dec 27 2027</code></pre>
+  <p><b>À surveiller chaque semaine</b> : échec d'un job <code>wiki-backup</code> (<code>kubectl -n wiki get jobs</code>),
+  espace disque de la VM (local-path ne plafonne pas les volumes), échéance du certificat, avis de sécurité de BookStack.</p>
+  <p><b>Réinstallation complète (B14)</b> : une VM avec k3s, ce dépôt, le dossier <code>.secrets/</code> (coffre) et un
+  export suffisent (annexe D). Les contenus sont aussi exportables par BookStack (livre › Exporter : HTML, PDF, Markdown).</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="part">
+  <h1><span class="num">8</span>Recette</h1>
+  <p>Exécutée par <code>./scripts/recette.sh --complet</code>. Les tests ouvrent de vraies sessions HTTPS via l'Ingress,
+  avec de vrais comptes ; le code TOTP est calculé selon la RFC 6238 par <code>scripts/totp.py</code>, comme le ferait
+  l'application du téléphone. Journal brut en annexe E.</p>
+  <div class="note">Campagne du 25/11/2026 sur le cluster de préparation (k3s v1.35.10, un nœud). Elle sera rejouée et datée sur la
+  plateforme de rendu (VM du TP) avant la remise : le script produit un nouveau journal qui remplace ce tableau.</div>
+  <table>
+    <thead><tr><th style="width:5%">Test</th><th style="width:22%">Ce qu'on vérifie</th><th>Commande et preuve</th><th style="width:7%">Date</th><th style="width:7%">Résultat</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Page de connexion en HTTPS</td><td>Titre « Wiki Rhénatech » ; <code>openssl s_client</code> : TLSv1.3, chaîne vérifiée par l'autorité interne ; HSTS présent ; HTTP → 301</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R2</td><td>Un lecteur ne modifie rien</td><td><code>lecteur@</code> : <code>GET …/edit</code> → 302 ; <code>PUT</code> forcé → <code>updated_at</code> inchangé</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R3</td><td>Prestataire cloisonné</td><td>Procédures et sa clinique → 200 ; deux autres clients, Commercial, RH, Exploitation, étagère Interne → 404 ; recherche « tarif » → 0 résultat</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R4</td><td>TOTP obligatoire ; compte désactivé</td><td>Mot de passe seul → <code>/mfa/verify</code>, contenu inaccessible ; code décalé de 120 s → refusé ; bon code → accès ; après <code>disable-user.sh</code> : connexion refusée, session ouverte coupée</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R5</td><td>Journal d'audit</td><td><code>editeur@</code> modifie « Basculer sur le lien WAN de secours » → entrée <code>page_update</code> par editeur@</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R6</td><td>Pièce jointe de 15 Mo</td><td>Dépôt HTTPS, relecture identique (sha256), page retrouvée par la recherche ; 25 Mo refusé (422)</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R7</td><td>Pods supprimés sans perte</td><td><code>kubectl delete pod</code> BookStack puis <code>mariadb-0</code> : empreinte identique, service revenu seul en <b>21 s</b></td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R8</td><td>NetworkPolicy</td><td>Pod <code>recette-intrus</code> → MariaDB:3306 refusé ; pod BookStack → joint</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R9</td><td>Aucun secret dans Git</td><td><code>git grep</code> des valeurs réelles de <code>.secrets/</code> : aucune ; aucune clé privée ; <code>.secrets/</code> ignoré</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R10</td><td>Plateforme vidée et restaurée</td><td>Namespace supprimé, <code>deploy.sh --no-init</code> (26 s), restauration de l'export (61 s) : contenus identiques, TOTP valide, pièce de 15 Mo identique ; remise en service <b>87 s</b></td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R11</td><td>Mise à jour puis retour arrière</td><td><code>upgrade.sh</code> → v26.09.3, <code>/status</code> OK ; <code>rollback.sh</code> → v26.09.2 + restauration en <b>23 s</b>, contenus identiques</td><td>25/11</td><td class="ok">OK</td></tr>
+      <tr><td>R12</td><td>État en une minute</td><td><code>status.sh</code> en <b>1,1 s</b></td><td>25/11</td><td class="ok">OK</td></tr>
+    </tbody>
+  </table>
+  <h2>Défauts trouvés et corrigés pendant la mise au point</h2>
+  <p>Un test qui échoue est un diagnostic, pas un échec caché. Les quatre défauts suivants ont été corrigés puis re-testés :</p>
+  <table>
+    <thead><tr><th style="width:20%">Symptôme</th><th>Diagnostic</th><th style="width:30%">Correction</th></tr></thead>
+    <tbody>
+      <tr><td>Pod BookStack redémarré par la sonde de démarrage</td><td>Journaux : <code>nginx: socket() [::]:80 failed (97: Address family not supported)</code> : IPv6 absent sur le nœud</td><td>Script d'init qui retire l'écoute IPv6 si besoin</td></tr>
+      <tr><td>« Permissions could not be set » au démarrage</td><td><code>php-local.ini</code> monté en lecture seule dans <code>/config</code> : la remise des droits de l'image échoue</td><td>Fichier copié par le script d'init au lieu d'un montage subPath</td></tr>
+      <tr><td><span class="ko">Sauvegarde déclarée « OK » de 4 Ko</span></td><td><code>Can't connect to server on 'mariadb' (115)</code> : NetworkPolicy pas encore appliquée au pod neuf ; et <code>sh</code> sans <code>pipefail</code> masquait l'échec</td><td>Attente de la base, <code>bash</code> + <code>pipefail</code>, contrôle de fin de dump</td></tr>
+      <tr><td>Jeton d'API refusé « expiré »</td><td>Colonne <code>api_tokens.expires_at</code> de type DATE (pas DATETIME)</td><td>Expiration au lendemain, jeton supprimé en fin de script</td></tr>
+    </tbody>
+  </table>
+  <div class="grid2">
+    <figure><img src="captures/04-prestataire-code-totp-demande.png"><figcaption>Figure 5 · R4 : mot de passe correct, le code TOTP est exigé.</figcaption></figure>
+    <figure><img src="captures/07-prestataire-commercial-404.png"><figcaption>Figure 6 · R3 : le prestataire tape l'adresse du livre Commercial : « Livre non trouvé ».</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============================================================ 9 / 10 -->
+<section class="part">
+  <h1><span class="num">9</span>Limites et suite</h1>
+  <table>
+    <thead><tr><th style="width:30%">Ce que nous n'avons pas fait</th><th>Ce qu'il faudrait pour la production</th></tr></thead>
+    <tbody>
+      <tr><td>Un seul pod BookStack, un seul MariaDB, volumes locaux</td><td>Trois nœuds, stockage répliqué (Longhorn) ou NFS, deux réplicas BookStack et un PodDisruptionBudget (A3), MariaDB répliqué (Galera ou opérateur). Aujourd'hui, la panne du nœud coûte une restauration (87 s + décision).</td></tr>
+      <tr><td>Sauvegardes sur le disque des données tant que l'export n'est pas fait</td><td>Export automatique vers un stockage objet hors plateforme (MinIO, A2) et chiffrement des archives (elles contiennent le <code>.env</code> de l'image).</td></tr>
+      <tr><td>Image BookStack lancée en root</td><td>Image non-root, Pod Security « restricted », comptes de service dédiés (O5).</td></tr>
+      <tr><td>Pas d'annuaire (B15)</td><td>OIDC avec Keycloak (RFC 6749) ou LDAP avec LLDAP (RFC 4511) pour les salariés ; comptes locaux + TOTP gardés pour les prestataires.</td></tr>
+      <tr><td>Pas de courriel (B16)</td><td>Mailpit comme serveur de test (O3), puis le relais SMTP de l'entreprise, avec une NetworkPolicy de sortie vers ce relais.</td></tr>
+      <tr><td>Certificat renouvelé à la main (397 jours)</td><td>cert-manager avec un ClusterIssuer adossé à l'autorité interne (O6).</td></tr>
+      <tr><td>Supervision minimale (<code>status.sh</code>)</td><td>Prometheus + Grafana, alerte testée sur l'échec d'une sauvegarde et sur le disque (O4).</td></tr>
+      <tr><td>Désactivation de compte par script</td><td>BookStack n'a pas d'état « désactivé » natif ; avec un annuaire, la désactivation se ferait à la source.</td></tr>
+      <tr><td>Variante trois nœuds non chronométrée</td><td>Rejouer R7 et R10 avec arrêt d'un nœud.</td></tr>
+    </tbody>
+  </table>
+
+  <h1 style="margin-top:18px"><span class="num">10</span>Références</h1>
+  <table>
+    <thead><tr><th style="width:28%">Référence</th><th>Utilisée pour</th></tr></thead>
+    <tbody>
+      <tr><td>RFC 8446 · TLS 1.3</td><td>Chiffrement de l'accès HTTPS, TLS 1.2 minimum (TLSOption)</td></tr>
+      <tr><td>RFC 9110 · Sémantique HTTP</td><td>Redirection permanente 301, codes 302, 404, 422 lus par la recette</td></tr>
+      <tr><td>RFC 6797 · HSTS</td><td>Forcer HTTPS côté navigateur (Middleware <code>security-headers</code>)</td></tr>
+      <tr><td>RFC 5280 · Certificats X.509</td><td>Autorité interne, chaîne de confiance, SAN, contraintes de base</td></tr>
+      <tr><td>RFC 8555 · ACME</td><td>Pourquoi Let's Encrypt ne convient pas à un nom en <code>.lab</code></td></tr>
+      <tr><td>RFC 6238 · TOTP / RFC 4226 · HOTP</td><td>Double authentification, piège de l'horloge, calcul du code dans <code>totp.py</code></td></tr>
+      <tr><td>RFC 1918 · Adressage privé</td><td>Réseau des VM (192.168.56.0/24) et du cluster (10.42/16, 10.43/16)</td></tr>
+      <tr><td>RFC 2606 · Noms réservés</td><td>Domaines <code>.example</code> des comptes prestataires fictifs</td></tr>
+      <tr><td>RFC 4511 · LDAP / RFC 6749 · OAuth 2.0</td><td>Suite prévue pour B15</td></tr>
+      <tr><td>RGPD, articles 5 et 30</td><td>Minimisation, durée de conservation, registre de traitement</td></tr>
+      <tr><td>Documentation officielle</td><td>bookstackapp.com/docs (API, permissions, MFA) · docs.linuxserver.io (image bookstack) · hub.docker.com/_/mariadb · docs.k3s.io (Traefik, local-path, NetworkPolicy) · kubernetes.io/docs (StatefulSet, CronJob, NetworkPolicy, Pod Security) · doc.traefik.io (Middlewares, TLSOption)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ CONCLUSION -->
+<section class="part">
+  <h1>Conclusion</h1>
+  <p>La maquette répond à tous les besoins indispensables B1 à B13 et au besoin souhaité B14. Rhénatech dispose d'une
+  base documentaire unique, hébergée en interne, accessible uniquement en HTTPS, où chaque prestataire, identifié
+  par un compte nominatif et une double authentification, ne voit que les procédures d'intervention et les fiches
+  des clients sur lesquels il intervient. Le scénario de l'incident de septembre (une procédure périmée circulant
+  par courriel) n'a plus de raison d'être : il n'existe qu'une version de chaque procédure, avec son historique et
+  la trace de qui l'a modifiée.</p>
+  <p>L'infrastructure est entièrement décrite dans le dépôt Git et se reconstruit en une commande. Les chiffres
+  mesurés laissent une marge large par rapport aux exigences : restauration complète en 87 s pour 4 h exigées,
+  état du service en 1,1 s pour une minute exigée, mise à jour avec retour arrière testé.</p>
+  <p>Les limites sont connues et chiffrées : un seul nœud et des volumes locaux, des sauvegardes à exporter hors
+  plateforme, une image lancée en root, ni annuaire ni courriel. La partie 9 décrit ce qu'il faudrait pour passer en
+  production. Le premier chantier serait le stockage répliqué avec deux réplicas, qui supprimerait le seul point
+  unique de défaillance gênant pour l'astreinte.</p>
+  <p>Sur le plan pédagogique, le projet nous a fait pratiquer de bout en bout l'orchestration d'une application avec
+  état (AC34.01, AC34.02), le code d'infrastructure (AC35.02), le traitement d'incidents réels rencontrés pendant la
+  recette (AC34.03) et la maîtrise critique du code produit avec l'aide d'une IA (AC35.04, annexe F).</p>
+</section>
+
+<!-- ============================================================ ANNEXES -->
+<section class="part">
+  <h1>Annexe A · Registre de traitement (RGPD, article 30)</h1>
+  <table>
+    <thead><tr><th style="width:22%">Rubrique</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td>Traitement</td><td>Base documentaire interne « Wiki Rhénatech » (BookStack)</td></tr>
+      <tr><td>Responsable</td><td>Rhénatech, direction ; contact : responsable infrastructure (C. Fischer)</td></tr>
+      <tr><td>Finalités</td><td>Mettre à disposition des procédures à jour ; contrôler qui accède à quoi ; tracer les modifications (qualité, analyse après incident)</td></tr>
+      <tr><td>Base légale</td><td>Intérêt légitime (sécurité des interventions, art. 6.1.f) ; exécution des contrats de sous-traitance</td></tr>
+      <tr><td>Personnes concernées</td><td>Salariés de Rhénatech (140) ; techniciens des sous-traitants (25)</td></tr>
+      <tr><td>Données</td><td>Identité : nom, courriel professionnel · Compte : rôles, empreinte bcrypt du mot de passe, secret TOTP chiffré, préférences · Traces : date, adresse IP, action et objet (journal d'audit), sessions · Contenus rédigés (auteur, date)</td></tr>
+      <tr><td>Données exclues</td><td>Aucune donnée sensible (art. 9) ; pas de photo (avatars externes désactivés) ; pas de donnée client nominative ; plannings nominatifs d'astreinte tenus hors du wiki</td></tr>
+      <tr><td>Destinataires</td><td>Administrateurs (comptes, journal) ; utilisateurs selon leurs droits (nom de l'auteur d'une page)</td></tr>
+      <tr><td>Transferts hors UE</td><td>Aucun : hébergement interne, aucun flux sortant (NetworkPolicy)</td></tr>
+      <tr><td>Durées de conservation</td><td>Journal d'audit : 365 jours (purge automatique hebdomadaire) · Compte prestataire : désactivé à la fin du contrat, supprimé un an après · Compte salarié : supprimé au départ · Sauvegardes : 7 jours sur le cluster, 30 jours conseillés pour les exports</td></tr>
+      <tr><td>Sécurité</td><td>HTTPS (TLS ≥ 1.2), TOTP obligatoire pour administrateurs et prestataires, cloisonnement par rôle, NetworkPolicy, secrets hors Git, sauvegardes vérifiées, journal d'audit</td></tr>
+      <tr><td>Droits des personnes</td><td>Accès et rectification via le profil ; effacement sur demande aux administrateurs (compte supprimé, traces purgées au terme de la durée)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="part">
+  <h1>Annexe B · Captures d'écran du service</h1>
+  <div class="grid2">
+    <figure><img src="captures/01-connexion.png"><figcaption>Figure 7 · Page de connexion de https://wiki.rhenatech.lab (R1).</figcaption></figure>
+    <figure><img src="captures/02-lecteur-etageres.png"><figcaption>Figure 8 · Un salarié lecteur voit les trois étagères.</figcaption></figure>
+    <figure><img src="captures/12-admin-journal-audit.png"><figcaption>Figure 9 · Journal d'audit : connexions, enrôlement TOTP, adresse IP, horodatage (R5).</figcaption></figure>
+    <figure><img src="captures/09-admin-roles.png"><figcaption>Figure 10 · Les rôles : Administrateur, Éditeur, Lecteur, Prestataire, rôles d'accès client.</figcaption></figure>
+    <figure><img src="captures/05-prestataire-etageres.png"><figcaption>Figure 11 · Le prestataire Alpha ne voit que deux étagères, pas Interne (R3).</figcaption></figure>
+    <figure><img src="captures/06-prestataire-clients-un-seul.png"><figcaption>Figure 12 · Étagère Clients vue par Alpha : un seul livre, le sien (R3).</figcaption></figure>
+    <figure><img src="captures/08-prestataire-recherche-tarif.png"><figcaption>Figure 13 · Recherche « tarif » par le prestataire : aucun résultat (R3).</figcaption></figure>
+    <figure><img src="captures/03-lecteur-page-sans-bouton-modifier.png"><figcaption>Figure 14 · Le lecteur ouvre une page : aucune action de modification (R2).</figcaption></figure>
+  </div>
+  <figure style="width:70%;margin:6px auto"><img src="captures/13-admin-utilisateurs.png"><figcaption>Figure 15 · Comptes nominatifs de démonstration et leurs rôles (B4).</figcaption></figure>
+</section>
+
+<section class="part">
+  <h1>Annexe C · Manifestes Kubernetes commentés (extraits)</h1>
+  <h3>NetworkPolicy : refus par défaut et accès à MariaDB</h3>
+<pre><code>apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny-all }
+spec: { podSelector: {}, policyTypes: [Ingress, Egress] }     <span class="c"># tout est refusé</span>
+---
+kind: NetworkPolicy
+metadata: { name: mariadb-from-clients }
+spec:
+  podSelector: { matchLabels: { app: mariadb } }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions: [{ key: app, operator: In, values: [bookstack, wiki-backup, wiki-maintenance] }]
+      ports: [{ protocol: TCP, port: 3306 }]</code></pre>
+  <h3>StatefulSet MariaDB (extrait)</h3>
+<pre><code>securityContext: { runAsNonRoot: true, runAsUser: 999, fsGroup: 999, seccompProfile: { type: RuntimeDefault } }
+env:
+  - { name: MARIADB_PASSWORD, valueFrom: { secretKeyRef: { name: wiki-secrets, key: DB_PASSWORD } } }
+  - { name: MARIADB_AUTO_UPGRADE, value: "1" }          <span class="c"># mise à jour mineure de MariaDB</span>
+readinessProbe: { exec: { command: ["healthcheck.sh", "--connect", "--innodb_initialized"] } }
+livenessProbe:  { exec: { command: ["healthcheck.sh", "--connect"] } }
+resources: { requests: { cpu: 250m, memory: 512Mi }, limits: { cpu: "1", memory: 1Gi } }
+volumeClaimTemplates:
+  - spec: { accessModes: [ReadWriteOnce], storageClassName: local-path, resources: { requests: { storage: 5Gi } } }</code></pre>
+  <h3>CronJob de sauvegarde (extrait)</h3>
+<pre><code>schedule: "0 2 * * *"
+timeZone: Europe/Paris
+concurrencyPolicy: Forbid
+  containers:
+    - image: mariadb                                    <span class="c"># même version que le serveur</span>
+      command: ["/bin/bash", "/scripts/backup.sh"]
+      env: [{ name: MYSQL_PWD, valueFrom: { secretKeyRef: { name: wiki-secrets, key: DB_PASSWORD } } }]
+      volumeMounts:
+        - { name: config,  mountPath: /config, readOnly: true }   <span class="c"># fichiers de BookStack</span>
+        - { name: backups, mountPath: /backup }</code></pre>
+  <h3>Cœur du script de sauvegarde</h3>
+<pre><code>set -euo pipefail                                        <span class="c"># un échec du dump fait échouer le job</span>
+mariadb-dump -h mariadb -u bookstack --single-transaction --quick --routines --triggers bookstack \
+  | gzip -6 > "$DEST/bookstack.sql.gz"
+zcat "$DEST/bookstack.sql.gz" | tail -1 | grep -q "Dump completed" || fail "dump incomplet"
+tar -czf "$DEST/config.tar.gz" -C /config --exclude=./log .
+( cd "$DEST" && sha256sum bookstack.sql.gz config.tar.gz > SHA256SUMS ) && touch "$DEST/DONE"
+find /backup -maxdepth 1 -type d -name '20*' -mtime +7 -exec rm -rf {} +   <span class="c"># rétention 7 jours</span></code></pre>
+  <p>L'intégralité des manifestes et des scripts est dans le dépôt (<code>k8s/</code>, <code>scripts/</code>), commentée en français.</p>
+</section>
+
+<section class="part">
+  <h1>Annexe D · Procédure de réinstallation complète</h1>
+  <p>Scénario : la VM est perdue. Il reste le dépôt Git, le coffre contenant <code>.secrets/</code> et le dernier export de
+  sauvegarde. Objectif : service rendu en moins de 4 h (B11). Durée mesurée de la partie Kubernetes : 87 s.</p>
+<pre><code><span class="c"># 1. Nouvelle VM Debian 13 (2 vCPU, 4 Go, 40 Go), réseau hôte 192.168.56.10</span>
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.35.10+k3s1 sh -
+sudo timedatectl set-ntp true && timedatectl          <span class="c"># « System clock synchronized: yes »</span>
+
+<span class="c"># 2. Poste d'administration : kubeconfig, dépôt, secrets d'origine (APP_KEY indispensable)</span>
+scp debian@192.168.56.10:/etc/rancher/k3s/k3s.yaml ~/.kube/config   <span class="c"># remplacer 127.0.0.1 par 192.168.56.10</span>
+git clone &lt;dépôt&gt; sae11 && cd sae11
+cp -r /chemin/du/coffre/.secrets .                     <span class="c"># wiki-secrets.env + tls/</span>
+
+<span class="c"># 3. Socle sans configuration initiale (elle viendra de la sauvegarde)</span>
+./scripts/deploy.sh --no-init
+
+<span class="c"># 4. Restauration de l'export</span>
+./scripts/restore.sh backups/AAAAMMJJ-HHMMSS
+
+<span class="c"># 5. Contrôles</span>
+./scripts/status.sh                                    <span class="c"># /status : database, cache, session à true</span>
+./scripts/recette.sh                                   <span class="c"># R1 à R9 et R12</span></code></pre>
+  <p>Si <code>.secrets/</code> est perdu : <code>deploy.sh</code> génère une nouvelle <code>APP_KEY</code>. La restauration
+  fonctionne, mais tous les utilisateurs devront ré-enrôler leur TOTP et l'autorité de certification devra être
+  redistribuée aux postes. D'où l'importance du coffre.</p>
+  <h2>Démarrage d'une nouvelle installation (sans sauvegarde)</h2>
+<pre><code>./scripts/deploy.sh          <span class="c"># ≈ 1 min 30 : socle + rôles + étagères + comptes</span>
+cat .secrets/comptes-demo.txt   <span class="c"># comptes et mots de passe générés (jamais versionnés)</span>
+<span class="c"># Poste client : hosts « 192.168.56.10 wiki.rhenatech.lab » + import de .secrets/tls/ca.crt</span></code></pre>
+</section>
+
+<section class="part">
+  <h1>Annexe E · Journal de recette brut</h1>
+  <p>Produit par <code>./scripts/recette.sh --complet</code> le 25/11/2026 (heures du poste en UTC ; les horodatages de la base sont en heure de Paris).
+  Fichier : <code>docs/recette/journal-20261125-082049.md</code>.</p>
+<pre><code>Cluster : v1.35.10+k3s1 · BookStack : lscr.io/linuxserver/bookstack:v26.09.2-ls296 · MariaDB : mariadb:11.8.9
+
+[R1 OK]  page de connexion : titre « Wiki Rhénatech », TLSv1.3, Verify return code: 0 (ok), HSTS, http→https 301
+[R2 OK]  lecteur : GET /edit → 302, PUT forcé → page inchangée (updated_at 2026-11-25 09:19:58)
+[R3 OK]  prestataire : procedures-reseau=200 client-clinique-des-tilleuls=200 procedures-dintervention=200
+         client-commune-de-val-dill=404 client-brasserie-lauch=404 commercial=404
+         ressources-humaines=404 exploitation-du-wiki=404 interne=404 ; recherche « tarif » : 0
+[R4 OK]  mot de passe seul → /mfa/verify, contenu → 302 ; code décalé de 120 s → refusé ; bon code → accès ;
+         après disable-user.sh : connexion → /login, session ouverte → 302
+[R5 OK]  dernière entrée : 2026-11-25 09:21:12 editeur@rhenatech.lab page_update
+[R6 OK]  dépôt HTTPS → pièce #3, relue à l'identique (sha256) ; recherche → « Restaurer le wiki »
+[R7 OK]  empreinte 19/1/8/2026-11-25 09:21:12 → identique, service revenu seul en 21 s
+[R8 OK]  pod sans label autorisé → REFUSE ; pod BookStack → JOINT
+[R9 OK]  valeurs réelles retrouvées : aucune ; clés privées : aucune ; .secrets/ ignoré
+[R10 OK] destruction 48 s | redéploiement 26 s | restauration 61 s | remise en service 87 s
+[R11 OK] après mise à jour : v26.09.3 ; après retour arrière : v26.09.2 (retour arrière terminé en 23 s)
+[R12 OK] ./scripts/status.sh en 1.1 s
+
+12 OK, 0 KO</code></pre>
+</section>
+
+<section class="part">
+  <h1>Annexe F · Usage de l'IA dans le projet</h1>
+  <p>Le sujet autorise et conseille l'IA ; ce qui compte est que le résultat soit juste et que chacun sache l'expliquer.
+  Voici comment nous l'avons utilisée, et ce que nous avons vérifié ou corrigé.</p>
+  <table>
+    <thead><tr><th style="width:24%">Usage</th><th>Ce que l'IA a produit</th><th style="width:34%">Ce que nous avons vérifié ou corrigé</th></tr></thead>
+    <tbody>
+      <tr><td>Premier jet des manifestes</td><td>Deployment, StatefulSet, Ingress, NetworkPolicy, CronJob</td><td>Chaque variable vérifiée dans la documentation de l'image (noms <code>DB_USERNAME</code>, <code>DB_DATABASE</code> de 2024) ; testé sur un vrai cluster</td></tr>
+      <tr><td>Scripts d'exploitation</td><td>Sauvegarde, restauration, mise à jour</td><td>Sauvegarde déclarée réussie alors que le dump échouait : ajout de <code>pipefail</code> et d'un contrôle de fin de dump</td></tr>
+      <tr><td>Configuration de BookStack</td><td>Appels à l'API (rôles, permissions de contenu)</td><td>Le premier jet créait un nouveau rôle « Administrateur » au lieu de renommer le rôle système : corrigé ; jeton d'API refusé (colonne DATE) : corrigé</td></tr>
+      <tr><td>Diagnostic</td><td>Pistes à partir de journaux d'erreur (sans secret ni donnée réelle)</td><td>Panne nginx sur IPv6, NetworkPolicy appliquée en retard aux pods neufs : diagnostiqués et corrigés</td></tr>
+      <tr><td>Rédaction</td><td>Premier jet du dossier</td><td>Relu, chiffres remplacés par nos mesures, choix reformulés avec nos raisons</td></tr>
+    </tbody>
+  </table>
+  <p>Règles respectées : aucun secret, aucun kubeconfig et aucune donnée réelle n'a été transmis à l'IA ; aucune image
+  <code>latest</code> ; chaque manifeste et chaque script a été relu ligne par ligne et testé avant d'être versionné.</p>
+</section>
+
+</body>
+</html>
